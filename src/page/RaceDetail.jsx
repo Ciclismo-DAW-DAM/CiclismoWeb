@@ -34,7 +34,7 @@ function RaceDetail() {
         addToParticipe(race);
       }
     } catch (error) {
-      toast.error('Error al procesar la solicitud');
+      toast.error(`Error al procesar la solicitud, ${error}`);
     }
   };
 
