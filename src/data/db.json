@@ -9,7 +9,7 @@
         "location": "Madrid, España",
         "coordinates": { "lat": 40.4168, "lng": -3.7038 },
         "entry_fee": 50,
-        "available_slots": 500,
+        "available_slots": 1,
         "status": "open",
         "category": "Gran Fondo",
         "max_time": "06:00:00",
