@@ -138,7 +138,9 @@ function RaceDetail() {
                     </span>
                   </div>
                 </div>
+
                 {renderActionButton()}
+
               </div>
 
               <div className="bg-gray-50 p-6 rounded-lg">

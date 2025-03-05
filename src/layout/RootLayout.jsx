@@ -1,10 +1,14 @@
 import React from 'react'
-import { Link, Outlet } from 'react-router-dom'
+import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
+
 function RootLayout() {
-  const {isAuthenticated, logout} = useAuth();
-  
+  const {navigate} = useNavigate()
+  const {isAuthenticated, logout } = useAuth();
+  function handlenavigate (){
+    navigate("/login");
+  }
   return (
     <div className="min-h-screen flex flex-col bg-[#f8f9fa]">
       <nav className="bg-[#00ffaa] shadow-lg">
@@ -13,7 +17,7 @@ function RootLayout() {
             {/* Logo/Brand section */}
             <div className="flex items-center">
               <span className="text-xl font-bold text-gray-800 pl-0">CiclismoWeb</span>
-              {isAuthenticated && (
+              
                 <div className="hidden sm:flex sm:ml-4">
                   <Link to="/home" className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
                     Inicio
@@ -22,7 +26,7 @@ function RootLayout() {
                     Participaciones
                   </Link>
                 </div>
-              )}
+    
             </div>
 
             {/* Mobile menu button */}
@@ -57,7 +61,12 @@ function RootLayout() {
                   </button>
                 </>
               ) : (
-              <h1></h1>
+                <button
+                onClick={handlenavigate}
+                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-150 ease-in-out"
+              >
+                Iniciar Sesion
+              </button>
               )}
             </div>
           </div>

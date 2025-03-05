@@ -4,44 +4,60 @@ import { toast } from "sonner";
 export const RaceContext = createContext();
 
 export const RaceProvider = ({ children }) => {
-  const [races, setRaces] = useState(() => {
-    const savedRaces = localStorage.getItem("races");
-    return savedRaces ? JSON.parse(savedRaces) : [];
-  });
-  
-  // Initialize isParticipation with localStorage data
+  const [races, setRaces] = useState([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [allDataFetched, setAllDataFetched] = useState(false);
+  const itemsPerPage = 8;
+
+  const fetchRaces = async () => {
+    if (allDataFetched) return;
+
+    try {
+      setLoading(true);
+      const response = await fetch(`http://localhost:5000/cycling`);
+      if (!response.ok) {
+        throw new Error("Error al cargar las carreras");
+      }
+      const data = await response.json();
+
+      const start = (page - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const paginatedData = data.slice(start, end);
+
+      if (paginatedData.length === 0 || paginatedData.length < itemsPerPage) {
+        setHasMore(false);
+        setAllDataFetched(true);
+      }
+
+      setRaces((prevRaces) => {
+        if (page === 1) return paginatedData;
+        return [...prevRaces, ...paginatedData];
+      });
+    } catch (error) {
+      console.error("Error fetching races:", error);
+      toast.error("Error al cargar las carreras");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (!allDataFetched) {
+      setPage((prevPage) => prevPage + 1);
+    }
+  };
+
+  useEffect(() => {
+    fetchRaces();
+  }, [page]);
+
   const [isParticipation, setIsParticipation] = useState(() => {
     const savedParticipations = localStorage.getItem("participations");
     return savedParticipations ? JSON.parse(savedParticipations) : [];
   });
-  
-  const fetchRaces = async () => {
-    try {
-      const response = await fetch('http://192.168.40.87:5000/cycling');
-      if (!response.ok) {
-        throw new Error('Error al cargar las carreras');
-      }
-      const data = await response.json();
-      setRaces(data);
-    } catch (error) {
-      console.error('Error fetching races:', error);
-      toast.error('Error al cargar las carreras', {
-        style: {
-          background: "red",
-          color: "white",
-          border: "2px solid red",
-        },
-      });
-    }
-  };
-  // Fetch races when component mounts
-  useEffect(() => {
-    fetchRaces();
-  }, []);
-  // Add this useEffect to save participations to localStorage
-  useEffect(() => {
-    localStorage.setItem("participations", JSON.stringify(isParticipation));
-  }, [isParticipation]);
+
   const addToParticipe = (raceToAdd) => {
     if (isParticipation.some((race) => race.id === raceToAdd.id)) {
       toast.error(`${raceToAdd.name} ya estas participando`, {
@@ -53,8 +69,34 @@ export const RaceProvider = ({ children }) => {
       });
       return;
     }
-    setIsParticipation((prevParticipation) => [...prevParticipation, raceToAdd]);
-    
+
+    // Check available slots
+    const currentRace = races.find((race) => race.id === raceToAdd.id);
+    if (currentRace.available_slots <= 0) {
+      toast.error(`No hay plazas disponibles para ${raceToAdd.name}`, {
+        style: {
+          background: "red",
+          color: "white",
+          border: "2px solid red",
+        },
+      });
+      return;
+    }
+
+    // Update available slots
+    setRaces((prevRaces) =>
+      prevRaces.map((race) =>
+        race.id === raceToAdd.id
+          ? { ...race, available_slots: race.available_slots - 1 }
+          : race
+      )
+    );
+
+    setIsParticipation((prevParticipation) => [
+      ...prevParticipation,
+      raceToAdd,
+    ]);
+
     toast.success(`Participaras en ${raceToAdd.name}`, {
       style: {
         background: "#fee2e2",
@@ -64,14 +106,24 @@ export const RaceProvider = ({ children }) => {
       icon: "👌",
     });
   };
+
   const removeToParticipe = (raceId) => {
-    const raceToRemove = isParticipation.find(race => race.id === raceId);
-    
-    setIsParticipation((prevParticipation) =>
-      prevParticipation.filter((race) => race.id !== raceId)
-    );
-    
+    const raceToRemove = isParticipation.find((race) => race.id === raceId);
+
     if (raceToRemove) {
+      // Restore available slot when user unregisters
+      setRaces((prevRaces) =>
+        prevRaces.map((race) =>
+          race.id === raceId
+            ? { ...race, available_slots: race.available_slots + 1 }
+            : race
+        )
+      );
+
+      setIsParticipation((prevParticipation) =>
+        prevParticipation.filter((race) => race.id !== raceId)
+      );
+
       toast.success(`Ya no participas en ${raceToRemove.name}`, {
         style: {
           background: "#fee2e2",
@@ -83,13 +135,18 @@ export const RaceProvider = ({ children }) => {
     }
   };
   return (
-    <RaceContext.Provider value={{ 
-      races, 
-      addToParticipe, 
-      removeToParticipe,
-      fetchRaces,
-      isParticipation // Add this to make participations available
-    }}>
+    <RaceContext.Provider
+      value={{
+        races,
+        addToParticipe,
+        removeToParticipe,
+        fetchRaces,
+        isParticipation,
+        loading,
+        hasMore,
+        loadMore,
+      }}
+    >
       {children}
     </RaceContext.Provider>
   );
@@ -101,4 +158,4 @@ export const useRace = () => {
     throw new Error("useRace debe estar dentro del proveedor RaceProvider");
   }
   return context;
-}
+};

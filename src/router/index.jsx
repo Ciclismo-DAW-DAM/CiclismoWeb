@@ -6,35 +6,45 @@ import Login from "../page/Login";
 import Participation from "../page/Participation";
 import Profile from "../page/Profile";
 import RaceDetail from "../page/RaceDetail";
-
 import { ProtectedRoute } from "../components/ProtectedRoute";
 
 export const router = createBrowserRouter([
-    {
-        path:"/",
-        element:<RootLayout/>,
-        errorElement: <ErrorPage />,
-        children:[
-            {
-                index: true,
-                element:<Login />
-            },
-            {
-                path: "home",
-                element: <ProtectedRoute><Home/></ProtectedRoute>
-            },
-            {
-                path:"profile", 
-                element: <ProtectedRoute><Profile /></ProtectedRoute>
-            },
-            {
-                path:"race/:id", 
-                element: <ProtectedRoute><RaceDetail /></ProtectedRoute>
-            },
-            {
-                path:"participation",
-                element: <ProtectedRoute><Participation /></ProtectedRoute>
-            }
-        ]
-    }
+  {
+    path: "/",
+    element: <RootLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      {
+        index: true,
+        path:"/home",
+        element: <Home />,
+      },
+      {
+        path: "login",
+        element: <Login />,
+      },
+      {
+        path: "race/:id",
+        element: (
+            <RaceDetail />
+        ),
+      },
+      {
+        path: "participation",
+        element: (
+          <ProtectedRoute>
+            <Participation />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
 ]);
