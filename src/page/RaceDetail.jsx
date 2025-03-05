@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { useRace } from '../context/RaceContext';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
+import RaceMap from '../components/RaceMap';
 
 function RaceDetail() {
   const { id } = useParams();
@@ -33,7 +34,7 @@ function RaceDetail() {
         addToParticipe(race);
       }
     } catch (error) {
-      toast.error('Error al procesar la solicitud');
+      toast.error(`Error al procesar la solicitud, ${error}`);
     }
   };
 
@@ -76,22 +77,22 @@ function RaceDetail() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 max-w-4xl">
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div className="relative h-96">
+        <div className="relative h-72">
           <img
             src={race.image}
             alt={race.name}
             className="w-full h-full object-cover"
           />
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-6">
-            <h1 className="text-4xl font-bold text-white mb-2">{race.name}</h1>
-            <p className="text-xl text-gray-200">{race.location}</p>
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
+            <h1 className="text-3xl font-bold text-white mb-2">{race.name}</h1>
+            <p className="text-lg text-gray-200">{race.location}</p>
           </div>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="p-4 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-4">
               <div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">Detalles de la Carrera</h2>
@@ -144,11 +145,8 @@ function RaceDetail() {
 
               <div className="bg-gray-50 p-6 rounded-lg">
                 <h3 className="text-xl font-bold text-gray-800 mb-4">Ubicación</h3>
-                <p className="text-gray-600 mb-2">{race.location}</p>
-                <div className="text-sm text-gray-500">
-                  <p>Lat: {race.coordinates.lat}</p>
-                  <p>Lng: {race.coordinates.lng}</p>
-                </div>
+                <p className="text-gray-600 mb-4">{race.location}</p>
+                <RaceMap coordinates={race.coordinates} />
               </div>
             </div>
           </div>
