@@ -8,32 +8,45 @@ export const RaceProvider = ({ children }) => {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [allDataFetched, setAllDataFetched] = useState(false);
   const itemsPerPage = 8;
 
   const fetchRaces = async () => {
+    if (allDataFetched) return;
+
     try {
       setLoading(true);
-      const response = await fetch(`http://192.168.40.87:5000/cycling?page=${page}&limit=${itemsPerPage}`);
+      const response = await fetch(`http://localhost:5000/cycling`);
       if (!response.ok) {
-        throw new Error('Error al cargar las carreras');
+        throw new Error("Error al cargar las carreras");
       }
       const data = await response.json();
-      
-      if (data.length < itemsPerPage) {
+
+      const start = (page - 1) * itemsPerPage;
+      const end = start + itemsPerPage;
+      const paginatedData = data.slice(start, end);
+
+      if (paginatedData.length === 0 || paginatedData.length < itemsPerPage) {
         setHasMore(false);
+        setAllDataFetched(true);
       }
-      
-      setRaces(prevRaces => page === 1 ? data : [...prevRaces, ...data]);
+
+      setRaces((prevRaces) => {
+        if (page === 1) return paginatedData;
+        return [...prevRaces, ...paginatedData];
+      });
     } catch (error) {
-      console.error('Error fetching races:', error);
-      toast.error('Error al cargar las carreras');
+      console.error("Error fetching races:", error);
+      toast.error("Error al cargar las carreras");
     } finally {
       setLoading(false);
     }
   };
 
   const loadMore = () => {
-    setPage(prevPage => prevPage + 1);
+    if (!allDataFetched) {
+      setPage((prevPage) => prevPage + 1);
+    }
   };
 
   useEffect(() => {
@@ -44,7 +57,7 @@ export const RaceProvider = ({ children }) => {
     const savedParticipations = localStorage.getItem("participations");
     return savedParticipations ? JSON.parse(savedParticipations) : [];
   });
-  
+
   const addToParticipe = (raceToAdd) => {
     if (isParticipation.some((race) => race.id === raceToAdd.id)) {
       toast.error(`${raceToAdd.name} ya estas participando`, {
@@ -58,7 +71,7 @@ export const RaceProvider = ({ children }) => {
     }
 
     // Check available slots
-    const currentRace = races.find(race => race.id === raceToAdd.id);
+    const currentRace = races.find((race) => race.id === raceToAdd.id);
     if (currentRace.available_slots <= 0) {
       toast.error(`No hay plazas disponibles para ${raceToAdd.name}`, {
         style: {
@@ -71,16 +84,19 @@ export const RaceProvider = ({ children }) => {
     }
 
     // Update available slots
-    setRaces(prevRaces =>
-      prevRaces.map(race =>
+    setRaces((prevRaces) =>
+      prevRaces.map((race) =>
         race.id === raceToAdd.id
           ? { ...race, available_slots: race.available_slots - 1 }
           : race
       )
     );
 
-    setIsParticipation((prevParticipation) => [...prevParticipation, raceToAdd]);
-    
+    setIsParticipation((prevParticipation) => [
+      ...prevParticipation,
+      raceToAdd,
+    ]);
+
     toast.success(`Participaras en ${raceToAdd.name}`, {
       style: {
         background: "#fee2e2",
@@ -92,12 +108,12 @@ export const RaceProvider = ({ children }) => {
   };
 
   const removeToParticipe = (raceId) => {
-    const raceToRemove = isParticipation.find(race => race.id === raceId);
-    
+    const raceToRemove = isParticipation.find((race) => race.id === raceId);
+
     if (raceToRemove) {
       // Restore available slot when user unregisters
-      setRaces(prevRaces =>
-        prevRaces.map(race =>
+      setRaces((prevRaces) =>
+        prevRaces.map((race) =>
           race.id === raceId
             ? { ...race, available_slots: race.available_slots + 1 }
             : race
@@ -107,7 +123,7 @@ export const RaceProvider = ({ children }) => {
       setIsParticipation((prevParticipation) =>
         prevParticipation.filter((race) => race.id !== raceId)
       );
-      
+
       toast.success(`Ya no participas en ${raceToRemove.name}`, {
         style: {
           background: "#fee2e2",
@@ -119,16 +135,18 @@ export const RaceProvider = ({ children }) => {
     }
   };
   return (
-    <RaceContext.Provider value={{ 
-      races, 
-      addToParticipe, 
-      removeToParticipe,
-      fetchRaces,
-      isParticipation,
-      loading,
-      hasMore,
-      loadMore
-    }}>
+    <RaceContext.Provider
+      value={{
+        races,
+        addToParticipe,
+        removeToParticipe,
+        fetchRaces,
+        isParticipation,
+        loading,
+        hasMore,
+        loadMore,
+      }}
+    >
       {children}
     </RaceContext.Provider>
   );
@@ -140,4 +158,4 @@ export const useRace = () => {
     throw new Error("useRace debe estar dentro del proveedor RaceProvider");
   }
   return context;
-}
+};
