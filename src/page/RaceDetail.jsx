@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { useRace } from '../context/RaceContext';
+import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 
 function RaceDetail() {
   const { id } = useParams();
   const { races, addToParticipe, removeToParticipe, isParticipation } = useRace();
+  const { isAuthenticated } = useAuth();
   const [race, setRace] = useState(null);
 
   useEffect(() => {
@@ -33,6 +35,44 @@ function RaceDetail() {
     } catch (error) {
       toast.error('Error al procesar la solicitud');
     }
+  };
+
+  const renderActionButton = () => {
+    if (!isAuthenticated) {
+      return (
+        <div className="mt-6 text-center">
+          <p className="text-gray-600 mb-3">Para inscribirte en esta carrera necesitas iniciar sesión</p>
+          <Link 
+            to="/login"
+            className="inline-block w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-center"
+          >
+            Iniciar Sesión
+          </Link>
+        </div>
+      );
+    }
+
+    if (race.available_slots > 0) {
+      return (
+        <button
+          onClick={handleParticipate}
+          className={`w-full mt-6 py-3 px-4 rounded-lg text-white transition-colors duration-200 ${
+            isParticipating 
+              ? 'bg-red-600 hover:bg-red-700' 
+              : 'bg-blue-600 hover:bg-blue-700'
+          }`}
+          disabled={race.status !== 'open'}
+        >
+          {isParticipating ? 'Desinscribirse' : 'Inscribirse'}
+        </button>
+      );
+    }
+
+    return (
+      <div className="mt-6 text-center py-3 px-4 bg-gray-100 rounded-lg text-red-600 font-medium">
+        Plazas Agotadas
+      </div>
+    );
   };
 
   return (
@@ -92,25 +132,14 @@ function RaceDetail() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Estado:</span>
-                    <span className="font-semibold capitalize">{race.status}</span>
+                    <span className={`font-semibold capitalize ${race.available_slots === 0 ? 'text-red-600' : ''}`}>
+                      {race.available_slots === 0 ? 'cerrado' : race.status}
+                    </span>
                   </div>
                 </div>
 
-                <button
-                  onClick={handleParticipate}
-                  className={`w-full mt-6 py-3 px-4 rounded-lg text-white transition-colors duration-200 ${
-                    isParticipating 
-                      ? 'bg-red-600 hover:bg-red-700' 
-                      : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
-                  disabled={race.status !== 'open'}
-                >
-                  {race.status !== 'open' 
-                    ? 'Inscripciones Cerradas' 
-                    : isParticipating 
-                      ? 'Anular Inscripcion' 
-                      : 'Inscribirse'}
-                </button>
+                {renderActionButton()}
+
               </div>
 
               <div className="bg-gray-50 p-6 rounded-lg">
