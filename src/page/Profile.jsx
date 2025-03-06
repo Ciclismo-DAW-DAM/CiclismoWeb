@@ -7,12 +7,25 @@ function Profile() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
-    email: "",
+  });
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData((prevState) => ({
       ...prevState,
       [name]: value,
     }));
@@ -46,17 +59,6 @@ function Profile() {
               className="w-full p-2 border rounded-md"
             />
           </div>
-
-          <div>
-            <label className="block text-gray-700 mb-2">Email:</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-            />
-          </div>
           <div className="flex justify-center gap-4">
             <button
               type="submit"
@@ -64,6 +66,53 @@ function Profile() {
             >
               Actualizar Perfil
             </button>
+          </div>
+        </form>
+      </div>
+
+      <div className="bg-gray-300 p-6 rounded-lg mt-6">
+        <h3 className="text-xl font-bold mb-4">Cambiar Contraseña</h3>
+        <form className="space-y-4">
+          <div>
+            <label className="block text-gray-700 mb-2">
+              Contraseña Actual:
+            </label>
+            <input
+              type="password"
+              name="currentPassword"
+              value={passwordData.currentPassword}
+              onChange={handlePasswordChange}
+              className="w-full p-2 border rounded-md"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2">
+              Nueva Contraseña:
+            </label>
+            <input
+              type="password"
+              name="newPassword"
+              value={passwordData.newPassword}
+              onChange={handlePasswordChange}
+              className="w-full p-2 border rounded-md"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2">
+              Repetir Nueva Contraseña:
+            </label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={passwordData.confirmPassword}
+              onChange={handlePasswordChange}
+              className="w-full p-2 border rounded-md"
+            />
+          </div>
+
+          <div className="flex justify-center">
             <button
               type="button"
               className="w-48 bg-teal-700 text-white py-2 px-4 rounded-md hover:bg-teal-800"
