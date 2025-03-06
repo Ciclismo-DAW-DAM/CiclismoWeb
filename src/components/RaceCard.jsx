@@ -3,26 +3,31 @@ import { Link } from 'react-router-dom';
 
 function RaceCard({ race }) {
   return (
-    <Link to={`/race/${race?.id}`} className="group">
-      <article className="card transform transition-transform duration-200 group-hover:scale-105">
-        <div className="relative aspect-[2/3]">
+    <Link to={`/race/${race?.id}`} className="block">
+      <article className="bg-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+        <div className="relative">
           <img
             src={race?.image}
             alt={race?.name}
-            className="w-full h-full object-cover rounded-lg"
+            className="w-full h-48 object-cover rounded-t-xl"
             loading="lazy"
           />
-          <div className="absolute top-2 right-2 bg-black text-white px-2 py-1 rounded-lg">
+          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-sky-900 px-3 py-1 rounded-full font-semibold text-sm shadow-lg">
             {Number(race?.distance_km).toFixed(1)} km
           </div>
         </div>
-        <div className="p-4">
-          <h3 className="text-lg font-bold text-sky-900 group-hover:text-gray-700">
-            {race.name}
+        <div className="p-5">
+          <h3 className="text-xl font-bold text-sky-900 mb-2 line-clamp-2">
+            {race?.name}
           </h3>
-          <p className="text-sm font-bold text-gray-800 mt-1">
-            {race.date}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+              {race?.date}
+            </p>
+            <span className="text-sky-600 font-medium hover:text-sky-800">
+              Ver detalles →
+            </span>
+          </div>
         </div>
       </article>
     </Link>
