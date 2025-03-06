@@ -5,7 +5,7 @@ import Spinner from "../components/Spinner";
 import SearchBar from "../components/SearchBar";
 
 function Home() {
-  const { races, loading, hasMore, loadMore } = useRace();
+  const { races, loading, hasMore, loadMore, searchResults } = useRace();
   const observer = useRef();
   const [filters, setFilters] = useState({
     category: "",
@@ -36,9 +36,8 @@ function Home() {
       [name]: value,
     }));
   };
-
   const currentDate = new Date();
-  const filteredRaces = races
+  const filteredRaces = (searchResults.length > 0 ? searchResults : races)
     .filter((race) => {
       const raceDate = new Date(race.date);
       return raceDate >= currentDate;
@@ -59,7 +58,6 @@ function Home() {
         (!filters.location || locationMatch)
       );
     });
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="-mt-12">
@@ -109,7 +107,10 @@ function Home() {
       </div>
 
       <h1 className="text-3xl font-bold text-gray-800 mb-6">
-        Carreras Disponibles
+        {searchResults.length > 0 ? 
+          "Carreras Encontradas" : 
+          "Carreras Disponibles"
+        }
       </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
