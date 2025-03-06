@@ -5,11 +5,24 @@ export const RaceContext = createContext();
 
 export const RaceProvider = ({ children }) => {
   const [races, setRaces] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [allDataFetched, setAllDataFetched] = useState(false);
   const itemsPerPage = 8;
+  // Add this new function to handle search
+  const handleSearch = (searchTerm) => {
+    if (!searchTerm.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    
+    const results = races.filter(race => 
+      race.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setSearchResults(results);
+  };
 
   const fetchRaces = async () => {
     if (allDataFetched) return;
@@ -138,6 +151,9 @@ export const RaceProvider = ({ children }) => {
     <RaceContext.Provider
       value={{
         races,
+        searchResults,
+        setSearchResults,
+        handleSearch,
         addToParticipe,
         removeToParticipe,
         fetchRaces,
@@ -145,6 +161,7 @@ export const RaceProvider = ({ children }) => {
         loading,
         hasMore,
         loadMore,
+        
       }}
     >
       {children}
