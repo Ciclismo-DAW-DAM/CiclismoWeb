@@ -17,7 +17,7 @@ const SearchBar = () => {
       if (!response.ok) {
         toast.error("Error al buscar la carrera", {
           style: {
-            background: "#fee2e2",
+            background: "red",
             color: "white",
             border: "2px solid red",
           },
@@ -31,7 +31,7 @@ const SearchBar = () => {
     } catch (error) {
       toast.error(`Error al buscar la carrera, ${error}`, {
         style: {
-          background: "#fee2e2",
+          background: "red",
           color: "white",
           border: "2px solid red",
         },

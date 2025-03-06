@@ -99,9 +99,9 @@ export const RaceProvider = ({ children }) => {
 
     toast.success(`Participaras en ${raceToAdd.name}`, {
       style: {
-        background: "#fee2e2",
-        color: "black",
-        border: "2px solid red",
+        background: "green",
+        color: "white",
+        border: "2px solid green",
       },
       icon: "👌",
     });
@@ -126,7 +126,7 @@ export const RaceProvider = ({ children }) => {
 
       toast.success(`Ya no participas en ${raceToRemove.name}`, {
         style: {
-          background: "#fee2e2",
+          background: "red",
           color: "white",
           border: "2px solid red",
         },
