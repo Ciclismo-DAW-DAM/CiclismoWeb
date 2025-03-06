@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Spinner from "../components/Spinner";
 
+
 const SearchBar = () => {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
@@ -12,9 +13,7 @@ const SearchBar = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `http://localhost:5173/api/cycling/${search.toLowerCase()}`
-      ); // Cambiar la url
+      const response = await fetch(`http://localhost:5173/api/cycling/${search.toLowerCase()}`); // Cambiar url
       if (!response.ok) {
         toast.error("Error al buscar la carrera", {
           style: {
@@ -27,8 +26,7 @@ const SearchBar = () => {
         return;
       }
       console.log(await response.json());
-      // Pinto una tarjeta con los detalles de la carrera
-      // o redirijo a la página de detalles de la carrera
+      // Pinto una tarjeta con los detalles de la carrera o redirijo a la página de detalles de la carrera
       navigate(`/search/${search.toLowerCase()}`);
     } catch (error) {
       toast.error(`Error al buscar la carrera, ${error}`, {
@@ -54,13 +52,12 @@ const SearchBar = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6">Carrera a buscar:</h1>
-      <form className="max-w-md mx-auto bg-white p-6 rounded-xl shadow-lg" onSubmit={handleSubmit}>
+      <form className="max-w-md mx-auto bg-white p-1 rounded-xl shadow-lg" onSubmit={handleSubmit}>
         <div className="flex gap-2">
-          <input className="flex-1 p-2 border-gray-200 border rounded-lg focus:outline-green-500"
-            type="text" value={search} placeholder="Buscar carrera"
+          <input className="flex-1 p-2 border-gray-200 border rounded-lg focus:outline-[#00ffaa]"
+            type="text" value={search} placeholder="Nombre de carrera"
             onChange={(e) => setSearch(e.target.value)}/>
-          <button className="bg-green-500 text-white px-4 py-2 rounded hover:bg-slate-900" type="submit">
+          <button className="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-900" type="submit">
             Buscar
           </button>
         </div>
