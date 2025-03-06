@@ -2,6 +2,7 @@ import React, { useCallback, useRef } from "react";
 import { useRace } from "../context/RaceContext";
 import RaceCard from "../components/RaceCard";
 import Spinner from "../components/Spinner";
+import SearchBar from "../components/SearchBar";
 
 function Home() {
   const { races, loading, hasMore, loadMore } = useRace();
@@ -31,6 +32,9 @@ function Home() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <div className="-mt-12">
+        <SearchBar />
+      </div>
       <h1 className="text-3xl font-bold text-gray-800 mb-6">
         Carreras Disponibles
       </h1>
