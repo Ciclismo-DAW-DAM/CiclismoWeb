@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRace } from '../context/RaceContext';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const Participation = () => {
-  const { isParticipation, removeToParticipe } = useRace();
-
+  const { isParticipation, removeToParticipe, fetchUserParticipations } = useRace();
+  useEffect(() => {
+    fetchUserParticipations();
+  }, []);
   const handleRemoveParticipation = async (raceId) => {
     try {
       await removeToParticipe(raceId);
@@ -13,7 +15,6 @@ const Participation = () => {
       toast.error('Error al eliminar la participación');
     }
   };
-
   if (isParticipation.length === 0) {
     return (
       <div className="min-h-screen flex items-center justify-center">
