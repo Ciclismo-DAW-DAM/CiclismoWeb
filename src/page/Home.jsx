@@ -106,7 +106,7 @@ function Home() {
         />
       </div>
 
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">
+      <h1 className="text-3xl font-bold text-white mb-6">
         {searchResults.length > 0 ? 
           "Carreras Encontradas" : 
           "Carreras Disponibles"

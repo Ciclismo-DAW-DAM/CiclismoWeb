@@ -29,10 +29,19 @@ export const RaceProvider = ({ children }) => {
 
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/cycling`);
+      const response = await fetch("http://192.168.40.87:8000/api/cycling", {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
       if (!response.ok) {
-        throw new Error("Error al cargar las carreras");
+        const errorData = await response.text();
+        console.error("Response error:", errorData);
+        throw new Error(`Error al cargar las carreras: ${response.status}`);
       }
+
       const data = await response.json();
 
       const start = (page - 1) * itemsPerPage;

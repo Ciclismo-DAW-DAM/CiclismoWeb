@@ -12,7 +12,10 @@ L.Icon.Default.mergeOptions({
 });
 
 const RaceMap = ({ coordinates }) => {
-  const position = [parseFloat(coordinates.lat), parseFloat(coordinates.lng)];
+  // Parse coordinates from string if needed
+  const position = typeof coordinates === 'string' 
+    ? coordinates.split(',').map(coord => parseFloat(coord.trim()))
+    : [parseFloat(coordinates.lat), parseFloat(coordinates.lng)];
 
   return (
     <MapContainer 
@@ -21,7 +24,6 @@ const RaceMap = ({ coordinates }) => {
       style={{ height: '200px', width: '100%', borderRadius: '0.5rem' }}
     >
       <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <Marker position={position}>

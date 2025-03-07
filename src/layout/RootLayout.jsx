@@ -5,9 +5,11 @@ import { useAuth } from "../context/AuthContext";
 function RootLayout() {
   const { navigate } = useNavigate();
   const { isAuthenticated } = useAuth();
+  
   function handlenavigate() {
     navigate("/login");
   }
+  
   return (
     <div className="min-h-screen flex flex-col bg-[#f8f9fa]">
       <nav className="bg-[#00ffaa] shadow-lg">
@@ -15,13 +17,20 @@ function RootLayout() {
           <div className="flex justify-between items-center h-16">
             {/* Logo/Brand section */}
             <div className="flex items-center">
-              <span className="text-xl font-bold text-gray-800 pl-0">
-                CiclismoWeb
-              </span>
-
+              <Link to="/home" className="flex items-center">
+                <img 
+                  src="/images/logo.png" 
+                  alt="CiclismoWeb Logo" 
+                  className="h-10 w-auto mr-2"
+                />
+                <span className="text-xl font-bold text-gray-800 pl-0">
+                  CiclismoWeb
+                </span>
+              </Link>
+              {/* Rest of the navigation items */}
               <div className="hidden sm:flex sm:ml-4">
                 <Link
-                  to="/home"
+                  to="/"
                   className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Inicio
@@ -89,16 +98,13 @@ function RootLayout() {
       <main
         className="flex-grow py-6"
         style={{
-          backgroundImage:
-            "url('https://www.shutterstock.com/image-photo/spost-background-copyspace-cyclist-dramatic-600nw-2021762003.jpg')",
-          backgroundSize: "cover",
-          backgroundAttachment: "fixed",
-          backgroundPosition: "center",
-          backgroundColor: "rgba(255, 255, 255, 0.5)",
-          backgroundBlendMode: "overlay",
+          background: "linear-gradient(135deg, #001f3d 0%, #020D24 100%)",
+          position: "relative",
         }}
       >
-        <Outlet />
+        <div className="relative z-10">
+          <Outlet />
+        </div>
       </main>
     </div>
   );
