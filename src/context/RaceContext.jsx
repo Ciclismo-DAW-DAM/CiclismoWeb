@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 
+const API_URL = import.meta.env.VITE_API_URL_RACE;
+
 export const RaceContext = createContext();
 
 export const RaceProvider = ({ children }) => {
@@ -17,8 +19,8 @@ export const RaceProvider = ({ children }) => {
       setSearchResults([]);
       return;
     }
-    
-    const results = races.filter(race => 
+
+    const results = races.filter((race) =>
       race.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setSearchResults(results);
@@ -29,13 +31,7 @@ export const RaceProvider = ({ children }) => {
 
     try {
       setLoading(true);
-      const response = await fetch("http://192.168.40.87:8000/api/cycling", {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
+      const response = await fetch(`${API_URL}/api/cycling`);
       if (!response.ok) {
         const errorData = await response.text();
         console.error("Response error:", errorData);
@@ -170,7 +166,6 @@ export const RaceProvider = ({ children }) => {
         loading,
         hasMore,
         loadMore,
-        
       }}
     >
       {children}
