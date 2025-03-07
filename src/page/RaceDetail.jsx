@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useRace } from "../context/RaceContext";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
@@ -9,7 +9,7 @@ import Spinner from "../components/Spinner";
 function RaceDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { races, addToParticipe, removeToParticipe, isParticipation} =
+  const { races, addToParticipe, removeToParticipe, isParticipation } =
     useRace();
   const { isAuthenticated } = useAuth();
   const [race, setRace] = useState(null);
@@ -88,13 +88,13 @@ function RaceDetail() {
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
-      <button
+      {/* <button
         onClick={() => navigate(-1)}
         className="mb-4 text-gray-300 hover:text-white flex items-center gap-2 px-4 py-2 rounded-lg transition-colors duration-200"
       >
         <ArrowLeftIcon className="h-5 w-5" /> Volver
-      </button>
-      
+      </button> */}
+
       <div className="bg-white rounded-xl shadow-lg overflow-hidden">
         <div className="relative h-72">
           <img
@@ -174,7 +174,7 @@ function RaceDetail() {
                   Ubicación
                 </h3>
                 <p className="text-gray-600 mb-4">{race.location}</p>
-                {/* <RaceMap coordinates={race.coordinates} /> */}
+                <RaceMap coordinates={race.coordinates} />
               </div>
             </div>
           </div>

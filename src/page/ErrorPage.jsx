@@ -1,5 +1,5 @@
-import React from 'react'
-import { useNavigate, useRouteError } from 'react-router-dom'
+import React from "react";
+import { useNavigate, useRouteError } from "react-router-dom";
 
 function ErrorPage() {
   const error = useRouteError();
@@ -26,7 +26,7 @@ function ErrorPage() {
             Volver atrás
           </button>
           <button
-            onClick={() => navigate('/home')}
+            onClick={() => navigate("/")}
             className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-all duration-200"
           >
             Ir al inicio
@@ -34,7 +34,7 @@ function ErrorPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default ErrorPage
+export default ErrorPage;
