@@ -5,9 +5,15 @@ const API_URL = import.meta.env.VITE_API_URL_RACE;
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const user = localStorage.getItem('user');
+    return !!user; // Returns true if user exists in localStorage
+  });
+  
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
   const login = async (credentials) => {
     try {
       const response = await fetch(`${API_URL}/api/auth/login`, {
@@ -20,6 +26,8 @@ export const AuthProvider = ({ children }) => {
       if (response.ok) {
         setUser(data.user);
         setIsAuthenticated(true);
+        // Store user data in localStorage
+        localStorage.setItem('user', JSON.stringify(data.user));
       }
       return data;
     } catch (error) {
@@ -30,8 +38,9 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
+    // Remove user data from localStorage on logout
+    localStorage.removeItem('user');
   };
-
   const updateUser = async (userData) => {
     try {
       const response = await fetch(
