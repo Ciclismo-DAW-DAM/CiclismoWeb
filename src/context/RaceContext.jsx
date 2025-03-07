@@ -13,6 +13,8 @@ export const RaceProvider = ({ children }) => {
   const [hasMore, setHasMore] = useState(true);
   const [allDataFetched, setAllDataFetched] = useState(false);
   const itemsPerPage = 8;
+  const [isParticipation, setIsParticipation] = useState([]);
+
   // Add this new function to handle search
   const handleSearch = (searchTerm) => {
     if (!searchTerm.trim()) {
@@ -66,65 +68,152 @@ export const RaceProvider = ({ children }) => {
       setPage((prevPage) => prevPage + 1);
     }
   };
-  const [isParticipation, setIsParticipation] = useState([]);
-  const fetchUserParticipations = async () => {
-    try {
-      const userData = JSON.parse(localStorage.getItem('user'));
-      if (!userData || !userData.id) return;
 
-      const response = await fetch(`${API_URL}/api/user/${userData.id}`);
-      if (!response.ok) throw new Error('Error al obtener participaciones');
-      
-      const userData_participations = await response.json();
-      const participatedRaces = userData_participations.cyclingParticipants.map(p => p.cycling);
-      setIsParticipation(participatedRaces);
+  useEffect(() => {
+    fetchRaces();
+  }, [page]);
+
+  const addToParticipe = async (raceToAdd) => {
+    if (isParticipation.some((race) => race.id === raceToAdd.id)) {
+      toast.error(`${raceToAdd.name} ya estas participando`);
+      return;
+    }
+
+    try {
+      // Get user data from localStorage
+      const userData = JSON.parse(localStorage.getItem("user"));
+      if (!userData || !userData.id) {
+        throw new Error("Usuario no encontrado");
+      }
+
+      // Register new participant with user ID from localStorage
+      const registerResponse = await fetch(
+        `${API_URL}/api/cycling_participant/new`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            user: userData.id,
+            cycling: raceToAdd.id,
+            dorsal: 5,
+            banned: false,
+          }),
+        }
+      );
+
+      if (!registerResponse.ok) {
+        throw new Error("Error al registrar participante");
+      }
+
+      // Update local state
+      setRaces((prevRaces) =>
+        prevRaces.map((race) =>
+          race.id === raceToAdd.id
+            ? { ...race, available_slots: race.available_slots - 1 }
+            : race
+        )
+      );
+
+      setIsParticipation((prevParticipation) => [
+        ...prevParticipation,
+        raceToAdd,
+      ]);
+
+      toast.success(`Participarás en ${raceToAdd.name} `);
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Error al cargar las participaciones');
+      toast.error(`Error al inscribirse: ${error.message}`);
     }
   };
-  useEffect(() => {
-    fetchUserParticipations();
-  }, []);
-  const addToParticipe = async (raceToAdd) => {
-      if (isParticipation.some((race) => race.id === raceToAdd.id)) {
-        toast.error(`${raceToAdd.name} ya estas participando`);
-        return;
-      }
-    // Add this line after successful participation:
-    await fetchUserParticipations();
-  };
+
   const removeToParticipe = async (raceId) => {
     const raceToRemove = isParticipation.find((race) => race.id === raceId);
-  
+
     if (raceToRemove) {
       try {
-        const userData = JSON.parse(localStorage.getItem('user'));
+        const userData = JSON.parse(localStorage.getItem("user"));
         if (!userData || !userData.id) {
-          throw new Error('Usuario no encontrado');
+          throw new Error("Usuario no encontrado");
         }
-  
+
         // Get user's participations
         const response = await fetch(`${API_URL}/api/user/${userData.id}`);
-        if (!response.ok) throw new Error('Error al obtener participaciones');
+        if (!response.ok) throw new Error("Error al obtener participaciones");
         const userData_participations = await response.json();
-  
+
         // Find the participation ID for this race
         const participation = userData_participations.cyclingParticipants.find(
           (p) => p.cycling.id === raceId
         );
-  
+
         if (!participation) {
-          throw new Error('Participación no encontrada');
+          throw new Error("Participación no encontrada");
         }
-  
+
         // Delete the participation
-        const deleteResponse = await fetch(`${API_URL}/api/cycling_participant/${participation.id}`, {
-          method: 'DELETE',
+        const deleteResponse = await fetch(
+          `${API_URL}/api/cycling_participant/${participation.id}`,
+          {
+            method: "DELETE",
+          }
+        );
+
+        if (!deleteResponse.ok) {
+          throw new Error("Error al eliminar la participación");
+        }
+
+        // Update local state
+        setRaces((prevRaces) =>
+          prevRaces.map((race) =>
+            race.id === raceId
+              ? { ...race, available_slots: race.available_slots + 1 }
+              : race
+          )
+        );
+
+        setIsParticipation((prevParticipation) =>
+          prevParticipation.filter((race) => race.id !== raceId)
+        );
+
+        toast.success(`Ya no participas en ${raceToRemove.name}`, {
+          style: {
+            background: "red",
+            color: "white",
+            border: "2px solid red",
+          },
+          icon: "🗑️",
         });
-  // Add this line after successful removal:
-    await fetchUserParticipations();
+      } catch (error) {
+        console.error("Error:", error);
+        toast.error(`Error al desinscribirse: ${error.message}`);
+      }
+    }
   };
+
+  const fetchUserParticipations = async () => {
+    try {
+      const userData = JSON.parse(localStorage.getItem("user"));
+      if (!userData || !userData.id) {
+        throw new Error("Usuario no encontrado");
+      }
+
+      const response = await fetch(`${API_URL}/api/user/${userData.id}`);
+      if (!response.ok) {
+        throw new Error("Error al obtener participaciones");
+      }
+
+      const userData_participations = await response.json();
+      const participations = userData_participations.cyclingParticipants.map(
+        (p) => p.cycling
+      );
+      setIsParticipation(participations);
+    } catch (error) {
+      console.error("Error fetching participations:", error);
+      toast.error(`Error al cargar las participaciones: ${error.message}`);
+    }
+  };
+
   return (
     <RaceContext.Provider
       value={{
@@ -139,7 +228,7 @@ export const RaceProvider = ({ children }) => {
         loading,
         hasMore,
         loadMore,
-        fetchUserParticipations, // Add this to the context
+        fetchUserParticipations,
       }}
     >
       {children}

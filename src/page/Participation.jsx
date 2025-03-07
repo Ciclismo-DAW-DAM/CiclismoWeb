@@ -1,13 +1,34 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRace } from '../context/RaceContext';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 
 const Participation = () => {
   const { isParticipation, removeToParticipe, fetchUserParticipations } = useRace();
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    fetchUserParticipations();
+    const loadParticipations = async () => {
+      try {
+        await fetchUserParticipations();
+      } catch (error) {
+        toast.error('Error al cargar las participaciones');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadParticipations();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-700"></div>
+      </div>
+    );
+  }
+
   const handleRemoveParticipation = async (raceId) => {
     try {
       await removeToParticipe(raceId);
