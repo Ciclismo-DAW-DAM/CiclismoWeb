@@ -12,7 +12,8 @@ L.Icon.Default.mergeOptions({
 });
 
 const RaceMap = ({ coordinates }) => {
-  const position = [parseFloat(coordinates.lat), parseFloat(coordinates.lng)];
+  const [lat, lng] = coordinates.split(',').map(coord => parseFloat(coord.trim()));
+  const position = [lat, lng];
 
   return (
     <MapContainer 

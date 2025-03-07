@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "sonner";
 const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
@@ -18,11 +19,15 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // aquí hacemos un login.
-      await login(formData);
-      // redirigir a la página de productos si hay éxito
-      navigate("/home");
+      const result = await login(formData);
+      if (result.user) {
+        navigate("/");
+      } else {
+        setFormData(prev => ({ ...prev, password: "" }));
+        toast.error(result.message || "Email o contraseña incorrectos");
+      }
     } catch (error) {
+      setFormData(prev => ({ ...prev, password: "" }));
       console.log("Error al iniciar sesión", error);
     }
   };
@@ -37,7 +42,10 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="text-sm font-medium text-gray-700 block mb-2">
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-gray-700 block mb-2"
+            >
               Correo Electrónico
             </label>
             <div className="relative">
@@ -55,7 +63,10 @@ const Login = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="text-sm font-medium text-gray-700 block mb-2">
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-gray-700 block mb-2"
+            >
               Contraseña
             </label>
             <div className="relative">
@@ -79,7 +90,6 @@ const Login = () => {
             >
               Iniciar Sesión
             </button>
-
           </div>
         </form>
       </div>
