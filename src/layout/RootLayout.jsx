@@ -21,7 +21,7 @@ function RootLayout() {
 
               <div className="hidden sm:flex sm:ml-4">
                 <Link
-                  to="/home"
+                  to="/"
                   className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                 >
                   Inicio
