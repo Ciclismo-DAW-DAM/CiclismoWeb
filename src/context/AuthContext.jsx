@@ -41,26 +41,54 @@ export const AuthProvider = ({ children }) => {
     // Remove user data from localStorage on logout
     localStorage.removeItem('user');
   };
-  const updateUser = async (userData) => {
+  
+  const updatePassword = async (oldPassword, newPassword) => {
     try {
       const response = await fetch(
-        `http://localhost:8000/api/user/${user.id}/edit`,
+        `${API_URL}/api/user/${user.id}/edit`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(userData),
+          body: JSON.stringify({ 
+            oldpassword: oldPassword,
+            newpassword: newPassword 
+          }),
         }
       );
 
       const data = await response.json();
       if (response.ok) {
-        setUser(data.user);
-        return data;
+        return { success: true, message: "Password updated successfully" };
       }
       return data;
     } catch (error) {
-      console.error("Update user error:", error);
-      return { message: "Error updating user" };
+      console.error("Update password error:", error);
+      return { message: "Error updating password" };
+    }
+  };
+  const updateUsername = async (newName) => {
+    try {
+      const response = await fetch(
+        `${API_URL}/api/user/${user.id}/edit`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: newName }),
+        }
+      );
+
+      const data = await response.json();
+      if (response.ok) {
+        // Update the user in state and localStorage
+        const updatedUser = { ...user, name: newName };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        return { user: updatedUser };
+      }
+      return data;
+    } catch (error) {
+      console.error("Update username error:", error);
+      return { message: "Error updating username" };
     }
   };
 
@@ -71,7 +99,8 @@ export const AuthProvider = ({ children }) => {
         user,
         login,
         logout,
-        updateUser,
+        updateUsername,
+        updatePassword
       }}
     >
       {children}

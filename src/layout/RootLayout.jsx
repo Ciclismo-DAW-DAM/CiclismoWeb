@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 
 function RootLayout() {
   const { navigate } = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated ,user } = useAuth();
   
   function handlenavigate() {
     navigate("/login");
@@ -17,7 +17,7 @@ function RootLayout() {
           <div className="flex justify-between items-center h-16">
             {/* Logo/Brand section */}
             <div className="flex items-center">
-              <Link to="/home" className="flex items-center">
+              <Link to="/" className="flex items-center">
                 <img 
                   src="/images/logo.png" 
                   alt="CiclismoWeb Logo" 
@@ -74,12 +74,21 @@ function RootLayout() {
             <div className="hidden sm:flex items-center space-x-6">
               {isAuthenticated ? (
                 <>
+                 {user?.image && (
+                      <img 
+                        src={user.image || "https://via.placeholder.com/32"} 
+                        alt="Perfil" 
+                        className="w-8 h-8 rounded-full mr-2 object-cover border border-gray-300"
+                      />
+                    )}
                   <Link
                     to="/profile"
                     className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
                   >
+                    
                     Mi Perfil
                   </Link>
+                 
                 </>
               ) : (
                 <Link
