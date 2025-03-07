@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React from 'react';
+import { Link } from 'react-router-dom';
 
 function RaceCard({ race }) {
   return (
@@ -13,7 +13,7 @@ function RaceCard({ race }) {
             loading="lazy"
           />
           <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-sky-900 px-3 py-1 rounded-full font-semibold text-sm shadow-lg">
-            {Number(race?.distance_km)} km
+            {Number(race?.distance_km).toFixed(1)} km
           </div>
         </div>
         <div className="p-5">
@@ -22,7 +22,7 @@ function RaceCard({ race }) {
           </h3>
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-              {new Date(race?.date).toLocaleDateString()}
+              {race?.date}
             </p>
             <span className="text-sky-600 font-medium hover:text-sky-800">
               Ver detalles →

@@ -1,22 +1,20 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { toast } from "sonner";
 
 function Profile() {
-  const { logout, user, updateUser } = useAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: user?.email || "",
-    roles: user?.roles || [],
-    name: user?.name || "",
-    banned: user?.banned || false
+    username: "",
   });
 
   const [passwordData, setPasswordData] = useState({
-    oldpassword: "",
-    newpassword: "",
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
   });
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevState) => ({
@@ -24,6 +22,7 @@ function Profile() {
       [name]: value,
     }));
   };
+
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
     setPasswordData((prevState) => ({
@@ -31,49 +30,17 @@ function Profile() {
       [name]: value,
     }));
   };
-  const handleSubmit = async (e) => {
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      const response = await updateUser({
-        ...formData,
-        oldpassword: "",
-        newpassword: ""
-      });
-      
-      if (response.user) {
-        toast.success("Perfil actualizado correctamente");
-      } else {
-        toast.error(response.message || "Error al actualizar el perfil");
-      }
-    } catch (error) {
-      toast.error("Error al actualizar el perfil");
-    }
+    console.log("Form submitted:", formData);
   };
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await updateUser({
-        ...formData,
-        oldpassword: passwordData.oldpassword,
-        newpassword: passwordData.newpassword
-      });
-      if (response.user) {
-        toast.success("Contraseña actualizada correctamente");
-        setPasswordData({
-          oldpassword: "",
-          newpassword: "",
-        });
-      } else {
-        toast.error(response.message || "Error al actualizar la contraseña");
-      }
-    } catch (error) {
-      toast.error("Error al actualizar la contraseña");
-    }
-  };
+
   const handleLogout = () => {
     logout();
     navigate("/");
   };
+
   return (
     <div className="m-5 p-6 bg-white rounded-lg shadow-md min-h-[calc(100vh-40px)]">
       <h2 className="text-2xl font-bold mb-6">Perfil de Usuario</h2>
@@ -86,8 +53,8 @@ function Profile() {
             </label>
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="username"
+              value={formData.username}
               onChange={handleChange}
               className="w-full p-2 border rounded-md"
             />
@@ -105,34 +72,49 @@ function Profile() {
 
       <div className="bg-gray-300 p-6 rounded-lg mt-6">
         <h3 className="text-xl font-bold mb-4">Cambiar Contraseña</h3>
-        <form onSubmit={handlePasswordSubmit} className="space-y-4">
+        <form className="space-y-4">
           <div>
             <label className="block text-gray-700 mb-2">
               Contraseña Actual:
             </label>
             <input
               type="password"
-              name="oldpassword"
-              value={passwordData.oldpassword}
+              name="currentPassword"
+              value={passwordData.currentPassword}
               onChange={handlePasswordChange}
               className="w-full p-2 border rounded-md"
             />
           </div>
+
           <div>
             <label className="block text-gray-700 mb-2">
               Nueva Contraseña:
             </label>
             <input
               type="password"
-              name="newpassword"
-              value={passwordData.newpassword}
+              name="newPassword"
+              value={passwordData.newPassword}
               onChange={handlePasswordChange}
               className="w-full p-2 border rounded-md"
             />
           </div>
+
+          <div>
+            <label className="block text-gray-700 mb-2">
+              Repetir Nueva Contraseña:
+            </label>
+            <input
+              type="password"
+              name="confirmPassword"
+              value={passwordData.confirmPassword}
+              onChange={handlePasswordChange}
+              className="w-full p-2 border rounded-md"
+            />
+          </div>
+
           <div className="flex justify-center">
             <button
-              type="submit"
+              type="button"
               className="w-48 bg-teal-700 text-white py-2 px-4 rounded-md hover:bg-teal-800"
             >
               Cambiar Contraseña
