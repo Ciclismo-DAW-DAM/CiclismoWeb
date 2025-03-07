@@ -33,8 +33,11 @@ export const RaceProvider = ({ children }) => {
       setLoading(true);
       const response = await fetch(`${API_URL}/api/cycling`);
       if (!response.ok) {
-        throw new Error("Error al cargar las carreras");
+        const errorData = await response.text();
+        console.error("Response error:", errorData);
+        throw new Error(`Error al cargar las carreras: ${response.status}`);
       }
+
       const data = await response.json();
 
       const start = (page - 1) * itemsPerPage;
