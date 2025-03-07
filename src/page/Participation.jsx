@@ -1,9 +1,18 @@
 import React from 'react';
 import { useRace } from '../context/RaceContext';
 import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const Participation = () => {
   const { isParticipation, removeToParticipe } = useRace();
+
+  const handleRemoveParticipation = async (raceId) => {
+    try {
+      await removeToParticipe(raceId);
+    } catch (error) {
+      toast.error('Error al eliminar la participación');
+    }
+  };
 
   if (isParticipation.length === 0) {
     return (
@@ -23,7 +32,7 @@ const Participation = () => {
       <h1 className="text-3xl font-bold text-gray-800 mb-6">Mis Inscripciones</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {isParticipation.map((race) => (
-          <div key={race.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
+          <div key={race.id} className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="relative h-48">
               <img
                 src={race.image}
@@ -57,7 +66,7 @@ const Participation = () => {
                   Ver detalles
                 </Link>
                 <button
-                  onClick={() => removeToParticipe(race.id)}
+                  onClick={() => handleRemoveParticipation(race.id)}
                   className="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors duration-200"
                 >
                   Cancelar
