@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Spinner from "../components/Spinner";
 import { useRace } from '../context/RaceContext';

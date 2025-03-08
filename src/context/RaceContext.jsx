@@ -71,22 +71,44 @@ export const RaceProvider = ({ children }) => {
 
   useEffect(() => {
     fetchRaces();
+    fetchUserParticipations();
   }, [page]);
 
   const addToParticipe = async (raceToAdd) => {
     if (isParticipation.some((race) => race.id === raceToAdd.id)) {
-      toast.error(`${raceToAdd.name} ya estas participando`);
+      toast.error(`${raceToAdd.name} ya estás participando`);
       return;
     }
 
     try {
-      // Get user data from localStorage
-      const userData = JSON.parse(localStorage.getItem("user"));
+      // Obtener datos del usuario de localStorage de manera segura
+      const userData = localStorage.getItem("user")
+        ? JSON.parse(localStorage.getItem("user"))
+        : null;
+
       if (!userData || !userData.id) {
         throw new Error("Usuario no encontrado");
       }
 
-      // Register new participant with user ID from localStorage
+      // Verificar si el género del usuario coincide con el de la carrera
+      if (
+        raceToAdd.gender &&
+        userData.gender &&
+        raceToAdd.gender.toLowerCase() !== userData.gender.toLowerCase()
+      ) {
+        toast.error(
+          `Esta carrera es exclusiva para género ${
+            raceToAdd.gender.toLowerCase() === "m"
+              ? "masculino"
+              : raceToAdd.gender.toLowerCase() === "f"
+              ? "femenino"
+              : "no especificado"
+          }`
+        );
+        return;
+      }
+
+      // Registrar nuevo participante con el ID del usuario
       const registerResponse = await fetch(
         `${API_URL}/api/cycling_participant/new`,
         {
@@ -97,14 +119,13 @@ export const RaceProvider = ({ children }) => {
           body: JSON.stringify({
             user: userData.id,
             cycling: raceToAdd.id,
-            dorsal: 5,
-            banned: false,
           }),
         }
       );
 
       if (!registerResponse.ok) {
-        throw new Error("Error al registrar participante");
+        const errorData = await registerResponse.json();
+        throw new Error(errorData.message || "Error al registrar participante");
       }
 
       // Update local state
@@ -120,8 +141,7 @@ export const RaceProvider = ({ children }) => {
         ...prevParticipation,
         raceToAdd,
       ]);
-
-      toast.success(`Participarás en ${raceToAdd.name} `);
+      toast.success(`Participarás en ${raceToAdd.name}`);
     } catch (error) {
       toast.error(`Error al inscribirse: ${error.message}`);
     }

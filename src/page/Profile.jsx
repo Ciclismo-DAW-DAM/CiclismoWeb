@@ -129,11 +129,28 @@ function Profile() {
           Cambiar Contraseña
         </button>
       </div>
-      
       {/* Profile Tab */}
       {activeTab === "profile" && (
         <div>
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Edad
+              </label>
+              <p className="p-2 bg-gray-50 rounded-md text-gray-700">
+                {user?.age || 'No especificada'}
+              </p>
+            </div>
+            <div>
+              <label className="block text-gray-700 mb-2 font-medium">
+                Género
+              </label>
+              <p className="p-2 bg-gray-50 rounded-md text-gray-700">
+                {user?.gender?.toLowerCase() === 'm' ? 'Masculino' : 
+                 user?.gender?.toLowerCase() === 'f' ? 'Femenino' : 
+                 'No especificado'}
+              </p>
+            </div>
             <div>
               <label className="block text-gray-700 mb-2 font-medium">
                 Nombre de Usuario
@@ -147,9 +164,7 @@ function Profile() {
               />
             </div>
             <div>
-              
-              
-              <p className="text-xs text-gray-500 mt-1">El email no se puede modificar</p>
+              <p className="text-xs text-gray-500 mt-1">El email, edad y género no se pueden modificar</p>
             </div>
             <button
               type="submit"
@@ -160,7 +175,6 @@ function Profile() {
           </form>
         </div>
       )}
-      
       {/* Password Tab */}
       {activeTab === "password" && (
         <div>
@@ -198,7 +212,6 @@ function Profile() {
           </form>
         </div>
       )}
-      
       {/* Logout Button */}
       <div className="mt-8 pt-4 border-t">
         <button

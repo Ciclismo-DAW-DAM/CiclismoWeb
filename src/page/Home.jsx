@@ -11,8 +11,8 @@ function Home() {
     category: "",
     distance: "",
     location: "",
+    gender: "", // Add gender filter
   });
-
   const lastRaceElementRef = useCallback(
     (node) => {
       if (loading) return;
@@ -50,12 +50,14 @@ function Home() {
 
       return (
         (!filters.category || race.category === filters.category) &&
-        (!filters.distance || (
+        (!filters.distance ||
           (filters.distance === "short" && distanceNum <= 50) ||
-          (filters.distance === "medium" && distanceNum > 50 && distanceNum <= 100) ||
-          (filters.distance === "long" && distanceNum > 100)
-        )) &&
-        (!filters.location || locationMatch)
+          (filters.distance === "medium" &&
+            distanceNum > 50 &&
+            distanceNum <= 100) ||
+          (filters.distance === "long" && distanceNum > 100)) &&
+        (!filters.location || locationMatch) &&
+        (!filters.gender || race.gender?.toLowerCase() === filters.gender) // Add gender filter condition
       );
     });
   return (
@@ -65,7 +67,7 @@ function Home() {
       </div>
 
       {/* Filter Controls */}
-      <div className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-100 p-4 rounded-lg">
+      <div className="mb-6 grid grid-cols-1 sm:grid-cols-4 gap-4 bg-gray-100 p-4 rounded-lg">
         <select
           name="category"
           value={filters.category}
@@ -96,6 +98,17 @@ function Home() {
           <option value="long">Larga (mas 100km)</option>
         </select>
 
+        <select
+          name="gender"
+          value={filters.gender}
+          onChange={handleFilterChange}
+          className="p-2 rounded-md border"
+        >
+          <option value="">Todos los géneros</option>
+          <option value="m">Masculino</option>
+          <option value="f">Femenino</option>
+        </select>
+
         <input
           type="text"
           name="location"
@@ -107,10 +120,9 @@ function Home() {
       </div>
 
       <h1 className="text-3xl font-bold text-white mb-6">
-        {searchResults.length > 0 ? 
-          "Carreras Encontradas" : 
-          "Carreras Disponibles"
-        }
+        {searchResults.length > 0
+          ? "Carreras Encontradas"
+          : "Carreras Disponibles"}
       </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
