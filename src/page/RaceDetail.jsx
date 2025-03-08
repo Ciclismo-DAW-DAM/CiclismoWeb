@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useRace } from "../context/RaceContext";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "sonner";
@@ -7,7 +7,6 @@ import RaceMap from "../components/RaceMap";
 import Spinner from "../components/Spinner";
 
 function RaceDetail() {
-  const navigate = useNavigate();
   const { id } = useParams();
   const { races, addToParticipe, removeToParticipe, isParticipation } =
     useRace();
@@ -72,7 +71,7 @@ function RaceDetail() {
               ? "bg-red-600 hover:bg-red-700"
               : "bg-blue-600 hover:bg-blue-700"
           }`}
-          disabled={race.status !== "open"}
+          disabled={race.status.toLowerCase() !== "open"}
         >
           {isParticipating ? "Desinscribirse" : "Inscribirse"}
         </button>
@@ -132,6 +131,14 @@ function RaceDetail() {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-500">Categoría</p>
                   <p className="text-lg font-semibold">{race.category}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-500">Género</p>
+                  <p className="text-lg font-semibold">
+                    {race.gender?.toLowerCase() === 'm' ? 'Masculino' : 
+                     race.gender?.toLowerCase() === 'f' ? 'Femenino' : 
+                     'No especificado'}
+                  </p>
                 </div>
               </div>
             </div>

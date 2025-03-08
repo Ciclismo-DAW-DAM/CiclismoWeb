@@ -6,12 +6,12 @@ export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const user = localStorage.getItem('user');
+    const user = localStorage.getItem("user");
     return !!user; // Returns true if user exists in localStorage
   });
-  
+
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
+    const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
   const login = async (credentials) => {
@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
         setUser(data.user);
         setIsAuthenticated(true);
         // Store user data in localStorage
-        localStorage.setItem('user', JSON.stringify(data.user));
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
       return data;
     } catch (error) {
@@ -39,22 +39,19 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
     // Remove user data from localStorage on logout
-    localStorage.removeItem('user');
+    localStorage.removeItem("user");
   };
-  
+
   const updatePassword = async (oldPassword, newPassword) => {
     try {
-      const response = await fetch(
-        `${API_URL}/api/user/${user.id}/edit`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            oldpassword: oldPassword,
-            newpassword: newPassword 
-          }),
-        }
-      );
+      const response = await fetch(`${API_URL}/api/user/${user.id}/edit`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          oldpassword: oldPassword,
+          newpassword: newPassword,
+        }),
+      });
 
       const data = await response.json();
       if (response.ok) {
@@ -68,21 +65,18 @@ export const AuthProvider = ({ children }) => {
   };
   const updateUsername = async (newName) => {
     try {
-      const response = await fetch(
-        `${API_URL}/api/user/${user.id}/edit`,
-        {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: newName }),
-        }
-      );
+      const response = await fetch(`${API_URL}/api/user/${user.id}/edit`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newName }),
+      });
 
       const data = await response.json();
       if (response.ok) {
         // Update the user in state and localStorage
         const updatedUser = { ...user, name: newName };
         setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
+        localStorage.setItem("user", JSON.stringify(updatedUser));
         return { user: updatedUser };
       }
       return data;
@@ -100,7 +94,7 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         updateUsername,
-        updatePassword
+        updatePassword,
       }}
     >
       {children}
