@@ -130,15 +130,6 @@ export const RaceProvider = ({ children }) => {
         throw new Error(errorData.message || "Error al registrar participante");
       }
 
-      // Update local state
-      setRaces((prevRaces) =>
-        prevRaces.map((race) =>
-          race.id === raceToAdd.id
-            ? { ...race, available_slots: race.available_slots - 1 }
-            : race
-        )
-      );
-
       setIsParticipation((prevParticipation) => [
         ...prevParticipation,
         raceToAdd,
@@ -184,15 +175,6 @@ export const RaceProvider = ({ children }) => {
         if (!deleteResponse.ok) {
           throw new Error("Error al eliminar la participación");
         }
-
-        // Update local state
-        setRaces((prevRaces) =>
-          prevRaces.map((race) =>
-            race.id === raceId
-              ? { ...race, available_slots: race.available_slots + 1 }
-              : race
-          )
-        );
 
         setIsParticipation((prevParticipation) =>
           prevParticipation.filter((race) => race.id !== raceId)
@@ -277,13 +259,7 @@ export const RaceProvider = ({ children }) => {
   const fetchTotalParticipants = async (raceId) => {
     try {
       const response = await fetch(`${API_URL}/api/cycling/${raceId}`);
-
-      const contentType = response.headers.get("content-type");
-      if (
-        !response.ok ||
-        !contentType ||
-        !contentType.includes("application/json")
-      ) {
+      if (!response.ok) {
         throw new Error("Failed to fetch race data");
       }
 
@@ -292,6 +268,19 @@ export const RaceProvider = ({ children }) => {
       // Count non-banned participants
       const participants =
         data.cyclingParticipants?.filter((p) => !p.banned) || [];
+      
+      // Calculate real available slots
+      const totalSlots = data.available_slots;
+      const realAvailableSlots = Math.max(0, totalSlots - participants.length);
+      
+      // Update races state to reflect real available slots
+      setRaces(prevRaces => 
+        prevRaces.map(race => 
+          race.id === parseInt(raceId) 
+            ? { ...race, available_slots: realAvailableSlots }
+            : race
+        )
+      );
 
       setTotalParticipants((prev) => ({
         ...prev,
