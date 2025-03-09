@@ -16,6 +16,8 @@ function RaceDetail() {
     loading,
     raceResults,
     fetchRaceResults,
+    fetchTotalParticipants,
+    fetchUserParticipations 
   } = useRace();
   const { isAuthenticated } = useAuth();
   const [race, setRace] = useState(null);
@@ -32,6 +34,8 @@ function RaceDetail() {
       return;
     }
     setRace(currentRace);
+
+    fetchUserParticipations();
 
     // Fetch race results if the race is completed
     if (
@@ -73,6 +77,15 @@ function RaceDetail() {
       return (
         <div className="mt-6 text-center py-3 px-4 bg-gray-100 rounded-lg text-gray-600 font-medium">
           Carrera Finalizada
+        </div>
+      );
+    }
+
+    // Don't show registration button for closed races
+    if (race.status.toLowerCase() === "closed") {
+      return (
+        <div className="mt-6 text-center py-3 px-4 bg-gray-100 rounded-lg text-gray-600 font-medium">
+          Inscripciones Cerradas
         </div>
       );
     }
@@ -129,10 +142,10 @@ function RaceDetail() {
         return a.time.localeCompare(b.time);
       });
 
-     // Function to format time string
+    // Function to format time string
     const formatTime = (timeString) => {
       if (!timeString) return "N/A";
-      
+
       // If already in HH:MM:SS format, parse it
       if (timeString.includes(":")) {
         const parts = timeString.split(":");
@@ -142,7 +155,7 @@ function RaceDetail() {
           return `${parts[0]}m ${parts[1]}s`;
         }
       }
-      
+
       // If it's in seconds, convert to HH:MM:SS
       try {
         const totalSeconds = parseInt(timeString, 10);
@@ -150,7 +163,7 @@ function RaceDetail() {
           const hours = Math.floor(totalSeconds / 3600);
           const minutes = Math.floor((totalSeconds % 3600) / 60);
           const seconds = totalSeconds % 60;
-          
+
           if (hours > 0) {
             return `${hours}h ${minutes}m ${seconds}s`;
           } else if (minutes > 0) {
@@ -162,7 +175,7 @@ function RaceDetail() {
       } catch (e) {
         console.error("Error parsing time:", e);
       }
-      
+
       // Return original if parsing fails
       return timeString;
     };
@@ -192,10 +205,16 @@ function RaceDetail() {
                       key={participant.id}
                       className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
                     >
-                      <td className="py-3 px-4 text-center" >{index + 1}</td>
-                      <td className="py-3 px-4 text-center">{participant.dorsal}</td>
-                      <td className="py-3 px-4 text-center">{participant.user.name}</td>
-                      <td className="py-3 px-4 text-center">{formatTime(participant.time)}</td>
+                      <td className="py-3 px-4 text-center">{index + 1}</td>
+                      <td className="py-3 px-4 text-center">
+                        {participant.dorsal}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        {participant.user.name}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        {formatTime(participant.time)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -293,7 +312,7 @@ function RaceDetail() {
                     <span className="font-semibold">{race.entry_fee}€</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Plazas disponibles:</span>
+                    <span className="text-gray-600">Plazas totales:</span>
                     <span className="font-semibold">
                       {race.available_slots}
                     </span>
