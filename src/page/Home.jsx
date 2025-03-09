@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState, useEffect } from "react";
 import { useRace } from "../context/RaceContext";
 import RaceCard from "../components/RaceCard";
 import Spinner from "../components/Spinner";
@@ -11,8 +11,20 @@ function Home() {
     category: "",
     distance: "",
     location: "",
-    gender: "", // Add gender filter
+    gender: "",
   });
+  const [uniqueCategories, setUniqueCategories] = useState([]);
+
+  // Extract unique categories from races data
+  useEffect(() => {
+    if (races.length > 0) {
+      const categories = [...new Set(races.map(race => race.category))]
+        .filter(category => category) // Filter out null/undefined values
+        .sort(); // Sort alphabetically
+      setUniqueCategories(categories);
+    }
+  }, [races]);
+
   const lastRaceElementRef = useCallback(
     (node) => {
       if (loading) return;
@@ -75,17 +87,14 @@ function Home() {
           className="p-2 rounded-md border"
         >
           <option value="">Todas las categorías</option>
-          <option value="Gran Fondo">Gran Fondo</option>
-          <option value="Etapas">Etapas</option>
-          <option value="Ultra Fondo">Ultra Fondo</option>
-          <option value="Clásica">Clásica</option>
-          <option value="Montaña">Montaña</option>
-          <option value="Costa">Costa</option>
-          <option value="Aventura">Aventura</option>
-          <option value="Cultural">Cultural</option>
-          <option value="Naturaleza">Naturaleza</option>
+          {uniqueCategories.map(category => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
         </select>
 
+        {/* Other filters remain unchanged */}
         <select
           name="distance"
           value={filters.distance}
