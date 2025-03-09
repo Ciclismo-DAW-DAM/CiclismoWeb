@@ -2,9 +2,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 
 function RaceCard({ race }) {
+  const isRaceCompleted = race?.status?.toLowerCase() === "completed" || 
+                          race?.status?.toLowerCase() === "finished";
+
   return (
     <Link to={`/race/${race?.id}`} className="block">
-      <article className="bg-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300">
+      <article className={`bg-white rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300 ${isRaceCompleted ? 'grayscale' : ''}`}>
         <div className="relative">
           <img
             src={race?.image}
@@ -12,6 +15,13 @@ function RaceCard({ race }) {
             className="w-full h-48 object-cover rounded-t-xl"
             loading="lazy"
           />
+          {isRaceCompleted && (
+            <div className="absolute inset-0 bg-opacity-30 flex items-center justify-center rounded-t-xl">
+              <span className="bg-gray-800 text-white px-3 py-1 rounded-lg font-medium text-sm">
+                FINALIZADA
+              </span>
+            </div>
+          )}
           <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm text-sky-900 px-3 py-1 rounded-full font-semibold text-sm shadow-lg">
             {Number(race?.distance_km)} km
           </div>

@@ -8,8 +8,15 @@ import Spinner from "../components/Spinner";
 
 function RaceDetail() {
   const { id } = useParams();
-  const { races, addToParticipe, removeToParticipe, isParticipation } =
-    useRace();
+  const {
+    races,
+    addToParticipe,
+    removeToParticipe,
+    isParticipation,
+    loading,
+    raceResults,
+    fetchRaceResults,
+  } = useRace();
   const { isAuthenticated } = useAuth();
   const [race, setRace] = useState(null);
 
@@ -25,6 +32,14 @@ function RaceDetail() {
       return;
     }
     setRace(currentRace);
+
+    // Fetch race results if the race is completed
+    if (
+      currentRace.status?.toLowerCase() === "completed" ||
+      currentRace.status?.toLowerCase() === "finished"
+    ) {
+      fetchRaceResults(id);
+    }
   }, [id, races]);
 
   if (races.length === 0 || !race) {
@@ -45,7 +60,23 @@ function RaceDetail() {
     }
   };
 
+  const isRaceCompleted = () => {
+    return (
+      race?.status?.toLowerCase() === "completed" ||
+      race?.status?.toLowerCase() === "finished"
+    );
+  };
+
   const renderActionButton = () => {
+    // Don't show registration button for completed races
+    if (isRaceCompleted()) {
+      return (
+        <div className="mt-6 text-center py-3 px-4 bg-gray-100 rounded-lg text-gray-600 font-medium">
+          Carrera Finalizada
+        </div>
+      );
+    }
+
     if (!isAuthenticated) {
       return (
         <div className="mt-6 text-center">
@@ -85,6 +116,101 @@ function RaceDetail() {
     );
   };
 
+  const renderResultsTable = () => {
+    if (!isRaceCompleted() || !raceResults || loading) {
+      return null;
+    }
+
+    // Sort participants by time (assuming time is in a format that can be compared)
+    const sortedParticipants = [...raceResults.cyclingParticipants]
+      .filter((participant) => !participant.banned)
+      .sort((a, b) => {
+        // If time is in format "HH:MM:SS", we can compare as strings
+        return a.time.localeCompare(b.time);
+      });
+
+     // Function to format time string
+    const formatTime = (timeString) => {
+      if (!timeString) return "N/A";
+      
+      // If already in HH:MM:SS format, parse it
+      if (timeString.includes(":")) {
+        const parts = timeString.split(":");
+        if (parts.length === 3) {
+          return `${parts[0]}h ${parts[1]}m ${parts[2]}s`;
+        } else if (parts.length === 2) {
+          return `${parts[0]}m ${parts[1]}s`;
+        }
+      }
+      
+      // If it's in seconds, convert to HH:MM:SS
+      try {
+        const totalSeconds = parseInt(timeString, 10);
+        if (!isNaN(totalSeconds)) {
+          const hours = Math.floor(totalSeconds / 3600);
+          const minutes = Math.floor((totalSeconds % 3600) / 60);
+          const seconds = totalSeconds % 60;
+          
+          if (hours > 0) {
+            return `${hours}h ${minutes}m ${seconds}s`;
+          } else if (minutes > 0) {
+            return `${minutes}m ${seconds}s`;
+          } else {
+            return `${seconds}s`;
+          }
+        }
+      } catch (e) {
+        console.error("Error parsing time:", e);
+      }
+      
+      // Return original if parsing fails
+      return timeString;
+    };
+
+    return (
+      <div className="mt-8 bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="p-4 space-y-4">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            Resultados de la Carrera
+          </h2>
+          {loading ? (
+            <Spinner />
+          ) : sortedParticipants.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="min-w-full bg-white rounded-lg overflow-hidden">
+                <thead className="bg-gray-100">
+                  <tr>
+                    <th className="py-3 px-4 text-center">Posición</th>
+                    <th className="py-3 px-4 text-center">Dorsal</th>
+                    <th className="py-3 px-4 text-center">Participante</th>
+                    <th className="py-3 px-4 text-center">Tiempo</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {sortedParticipants.map((participant, index) => (
+                    <tr
+                      key={participant.id}
+                      className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
+                    >
+                      <td className="py-3 px-4 text-center" >{index + 1}</td>
+                      <td className="py-3 px-4 text-center">{participant.dorsal}</td>
+                      <td className="py-3 px-4 text-center">{participant.user.name}</td>
+                      <td className="py-3 px-4 text-center">{formatTime(participant.time)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-gray-600">
+              No hay resultados disponibles para esta carrera.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       {/* <button
@@ -99,8 +225,17 @@ function RaceDetail() {
           <img
             src={race.image}
             alt={race.name}
-            className="w-full h-full object-cover"
+            className={`w-full h-full object-cover ${
+              isRaceCompleted() ? "grayscale" : ""
+            }`}
           />
+          {isRaceCompleted() && (
+            <div className="absolute inset-0 bg-opacity-30 flex items-center justify-center">
+              <span className="bg-gray-800 text-white px-4 py-2 rounded-lg font-bold text-lg">
+                CARRERA FINALIZADA
+              </span>
+            </div>
+          )}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
             <h1 className="text-3xl font-bold text-white mb-2">{race.name}</h1>
             <p className="text-lg text-gray-200">{race.location}</p>
@@ -135,9 +270,11 @@ function RaceDetail() {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <p className="text-sm text-gray-500">Género</p>
                   <p className="text-lg font-semibold">
-                    {race.gender?.toLowerCase() === 'm' ? 'Masculino' : 
-                     race.gender?.toLowerCase() === 'f' ? 'Femenino' : 
-                     'No especificado'}
+                    {race.gender?.toLowerCase() === "m"
+                      ? "Masculino"
+                      : race.gender?.toLowerCase() === "f"
+                      ? "Femenino"
+                      : "No especificado"}
                   </p>
                 </div>
               </div>
@@ -187,6 +324,7 @@ function RaceDetail() {
           </div>
         </div>
       </div>
+      {renderResultsTable()}
     </div>
   );
 }

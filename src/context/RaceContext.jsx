@@ -14,6 +14,8 @@ export const RaceProvider = ({ children }) => {
   const [allDataFetched, setAllDataFetched] = useState(false);
   const itemsPerPage = 8;
   const [isParticipation, setIsParticipation] = useState([]);
+  const [raceResults, setRaceResults] = useState(null);
+  const [totalParticipants, setTotalParticipants] = useState({});
 
   // Add this new function to handle search
   const handleSearch = (searchTerm) => {
@@ -234,6 +236,75 @@ export const RaceProvider = ({ children }) => {
     }
   };
 
+  const fetchRaceResults = async (raceId) => {
+    setLoading(true);
+    try {
+      // Update the URL to use the API_URL constant for consistency
+      const response = await fetch(`${API_URL}/api/cycling/${raceId}`);
+
+      // Check content type before parsing
+      const contentType = response.headers.get("content-type");
+      if (!response.ok) {
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || "Failed to fetch race results");
+        } else {
+          const errorText = await response.text();
+          console.error("Server returned non-JSON response:", errorText);
+          throw new Error("Server returned an invalid response format");
+        }
+      }
+
+      // Make sure we're getting JSON before parsing
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await response.text();
+        console.error("Expected JSON but got:", text);
+        throw new Error("Server returned non-JSON data");
+      }
+
+      const data = await response.json();
+      setRaceResults(data);
+    } catch (error) {
+      console.error("Error fetching race results:", error);
+      toast.error(
+        `No se pudieron cargar los resultados de la carrera: ${error.message}`
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTotalParticipants = async (raceId) => {
+    try {
+      const response = await fetch(`${API_URL}/api/cycling/${raceId}`);
+
+      const contentType = response.headers.get("content-type");
+      if (
+        !response.ok ||
+        !contentType ||
+        !contentType.includes("application/json")
+      ) {
+        throw new Error("Failed to fetch race data");
+      }
+
+      const data = await response.json();
+
+      // Count non-banned participants
+      const participants =
+        data.cyclingParticipants?.filter((p) => !p.banned) || [];
+
+      setTotalParticipants((prev) => ({
+        ...prev,
+        [raceId]: participants.length,
+      }));
+
+      return participants.length;
+    } catch (error) {
+      console.error("Error fetching participants count:", error);
+      return 0;
+    }
+  };
+
   return (
     <RaceContext.Provider
       value={{
@@ -249,6 +320,10 @@ export const RaceProvider = ({ children }) => {
         hasMore,
         loadMore,
         fetchUserParticipations,
+        fetchRaceResults,
+        raceResults,
+        fetchTotalParticipants,
+        totalParticipants,
       }}
     >
       {children}
