@@ -5,6 +5,7 @@ const API_URL = import.meta.env.VITE_API_URL_RACE;
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const [token, setToken] = useState(localStorage.getItem("token") || null);
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     const user = localStorage.getItem("user");
     return !!user; // Returns true if user exists in localStorage
@@ -14,9 +15,10 @@ export const AuthProvider = ({ children }) => {
     const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
+
   const login = async (credentials) => {
     try {
-      const response = await fetch(`${API_URL}/api/auth/login`, {
+      const response = await fetch(`${API_URL}/api2/auth/login_check`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(credentials),
@@ -25,9 +27,11 @@ export const AuthProvider = ({ children }) => {
       const data = await response.json();
       if (response.ok) {
         setUser(data.user);
+        setToken(data.token);
         setIsAuthenticated(true);
         // Store user data in localStorage
         localStorage.setItem("user", JSON.stringify(data.user));
+        localStorage.setItem("token", data.token);
       }
       return data;
     } catch (error) {
@@ -40,13 +44,17 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     // Remove user data from localStorage on logout
     localStorage.removeItem("user");
+    localStorage.removeItem("token");
   };
 
   const updatePassword = async (oldPassword, newPassword) => {
     try {
       const response = await fetch(`${API_URL}/api/user/${user.id}/edit`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({
           oldpassword: oldPassword,
           newpassword: newPassword,
@@ -63,11 +71,15 @@ export const AuthProvider = ({ children }) => {
       return { message: "Error updating password" };
     }
   };
+
   const updateUsername = async (newName) => {
     try {
       const response = await fetch(`${API_URL}/api/user/${user.id}/edit`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
         body: JSON.stringify({ name: newName }),
       });
 
@@ -95,6 +107,7 @@ export const AuthProvider = ({ children }) => {
         logout,
         updateUsername,
         updatePassword,
+        token,
       }}
     >
       {children}

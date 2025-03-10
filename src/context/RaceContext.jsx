@@ -117,6 +117,7 @@ export const RaceProvider = ({ children }) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
           body: JSON.stringify({
             user: userData.id,
@@ -169,6 +170,9 @@ export const RaceProvider = ({ children }) => {
           `${API_URL}/api/cycling_participant/${participation.id}`,
           {
             method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
           }
         );
 
@@ -268,15 +272,15 @@ export const RaceProvider = ({ children }) => {
       // Count non-banned participants
       const participants =
         data.cyclingParticipants?.filter((p) => !p.banned) || [];
-      
+
       // Calculate real available slots
       const totalSlots = data.available_slots;
       const realAvailableSlots = Math.max(0, totalSlots - participants.length);
-      
+
       // Update races state to reflect real available slots
-      setRaces(prevRaces => 
-        prevRaces.map(race => 
-          race.id === parseInt(raceId) 
+      setRaces((prevRaces) =>
+        prevRaces.map((race) =>
+          race.id === parseInt(raceId)
             ? { ...race, available_slots: realAvailableSlots }
             : race
         )
